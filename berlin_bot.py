@@ -7,7 +7,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-
+import winsound
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 system = system()
 
@@ -24,9 +26,12 @@ class WebDriver:
     def __enter__(self) -> webdriver.Chrome:
         logging.info("Open browser")
         # some stuff that prevents us from being locked out
+
+
+        driver = webdriver.Chrome(ChromeDriverManager().install())
         options = webdriver.ChromeOptions() 
         options.add_argument('--disable-blink-features=AutomationControlled')
-        self._driver = webdriver.Chrome(options=options)
+        self._driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         self._driver.implicitly_wait(self._implicit_wait_time) # seconds
         self._driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         self._driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
@@ -60,27 +65,35 @@ class BerlinBot:
     @staticmethod
     def enter_form(driver: webdriver.Chrome):
         logging.info("Fill out form")
-        # select china
+        time.sleep(5)
+        # select Venezuela
         s = Select(driver.find_element(By.ID, 'xi-sel-400'))
-        s.select_by_visible_text("China")
+        logging.info("Venezuela")
+        s.select_by_value("367")
+        time.sleep(3)
         # eine person
         s = Select(driver.find_element(By.ID, 'xi-sel-422'))
+        logging.info("eine Person")
+        time.sleep(5)
         s.select_by_visible_text("eine Person")
         # no family
+        logging.info("nein family")
         s = Select(driver.find_element(By.ID, 'xi-sel-427' ))
+        s.select_by_visible_text("ja")
+        time.sleep(5)
         s.select_by_visible_text("nein")
         time.sleep(5)
-
         # extend stay
         driver.find_element(By.XPATH, '//*[@id="xi-div-30"]/div[2]/label/p').click()
-        time.sleep(2)
-
-        # click on study group
-        driver.find_element(By.XPATH, '//*[@id="inner-479-0-2"]/div/div[1]/label/p').click()
-        time.sleep(2)
-
-        # b/c of stufy
-        driver.find_element(By.XPATH, '//*[@id="inner-479-0-2"]/div/div[2]/div/div[5]/label').click()
+        logging.info("extend stay")
+        time.sleep(5)
+        # click on employment //*[@id="inner-367-0-2"]/div/div[3]/label/p
+        driver.find_element(By.XPATH, '//*[@id="inner-367-0-2"]/div/div[3]/label/p').click()
+        logging.info("Abre desplegable")
+        time.sleep(5)
+        # second radio
+        driver.find_element(By.XPATH, '//*[@id="inner-367-0-2"]/div/div[4]/div/div[2]/label').click()
+        logging.info("second radio")
         time.sleep(4)
 
         # submit form
@@ -90,7 +103,9 @@ class BerlinBot:
     def _success(self):
         logging.info("!!!SUCCESS - do not close the window!!!!")
         while True:
-            self._play_sound_osx(self._sound_file)
+            #
+            logging.info("Play sound")
+            winsound.PlaySound('alarm.wav', winsound.SND_FILENAME)
             time.sleep(15)
         
         # todo play something and block the browser
@@ -112,7 +127,10 @@ class BerlinBot:
 
     def run_loop(self):
         # play sound to check if it works
-        self._play_sound_osx(self._sound_file)
+        # self._play_sound_osx(self._sound_file)
+        #
+       # logging.info("Play sound")
+       # winsound.PlaySound('alarm.wav', winsound.SND_FILENAME)
         while True:
             logging.info("One more round")
             self.run_once()
